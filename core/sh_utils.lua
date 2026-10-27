@@ -1,107 +1,75 @@
-function GetSexFromModel(model)
-    local hash = GetSafeHashKey(model)
-    if hash == GetHashKey("mp_m_freemode_01") then
-        return 0
-    elseif hash == GetHashKey("mp_f_freemode_01") then
-        return 1
-    else
-        return 2
-    end
+Utils = {}
+
+local DOOR_TYPES = { single = true, double = true, sliding = true, garage = true }
+
+function Utils.Round(value, decimals)
+    local mult = 10 ^ (decimals or 2)
+    return math.floor((tonumber(value) or 0) * mult + 0.5) / mult
 end
 
-function GetGridZoneId(x, y)
-    local min = -8000
-    local max = 8000
-    local step = (max - min) / 32 -- 500
-
-    local xIdx = math.floor((x - min) / step)
-    local yIdx = math.floor((y - min) / step)
-
-    return xIdx + (yIdx * 100)
+function Utils.ToVector(coords)
+    if not coords then return nil end
+    return vector3(tonumber(coords.x) or 0.0, tonumber(coords.y) or 0.0, tonumber(coords.z) or 0.0)
 end
 
-function GetGridsSurroundingPosition(pos)
-    local grids = {}
-    local offsets = { -75, 0, 75 }
+function Utils.ToCoords(coords)
+    if not coords then return nil end
+    return {
+        x = Utils.Round(coords.x),
+        y = Utils.Round(coords.y),
+        z = Utils.Round(coords.z),
+    }
+end
 
-    for i = 1, 3 do
-        for j = 1, 3 do
-            local x = pos.x + offsets[i]
-            local y = pos.y + offsets[j]
-            grids[GetGridZoneId(x, y)] = true
+function Utils.Trim(value)
+    if type(value) ~= "string" then return "" end
+    return (value:gsub("^%s+", ""):gsub("%s+$", ""))
+end
+
+function Utils.IsDoorType(value)
+    return DOOR_TYPES[value] == true
+end
+
+function Utils.ToModel(model)
+    if type(model) == "number" then return model end
+    if type(model) ~= "string" or model == "" then return nil end
+
+    local asNumber = tonumber(model)
+    if asNumber then return asNumber end
+
+    return joaat(model)
+end
+
+-- Center of every door entity, used as interaction point when none is given
+function Utils.GetCenter(entities)
+    local x, y, z, count = 0.0, 0.0, 0.0, 0
+    for _, entity in ipairs(entities or {}) do
+        if entity.coords then
+            x = x + entity.coords.x
+            y = y + entity.coords.y
+            z = z + entity.coords.z
+            count = count + 1
         end
     end
 
-    return grids
+    if count == 0 then return nil end
+
+    return { x = x / count, y = y / count, z = z / count }
 end
 
-function TeleportTopCoords(pos, ent, trustPos)
-    if not pos or not pos.x or not pos.y or not pos.z or (ent and not DoesEntityExist(ent)) then return true end
-    local x, y, z = pos.x, pos.y, pos.z + 1.0
-    ent = ent or GetPlayerPed(-1)
+function Utils.StringList(list, max)
+    local result = {}
+    local seen = {}
+    if type(list) ~= "table" then return result end
 
-    RequestCollisionAtCoord(x, y, z)
-
-    local tempTimer = GetGameTimer()
-    while not IsNewLoadSceneLoaded() do
-        if GetGameTimer() - tempTimer > 3000 then
-            break
-        end
-
-        Citizen.Wait(0)
-    end
-
-    SetEntityCoordsNoOffset(ent, x, y, z)
-
-    tempTimer = GetGameTimer()
-    while not HasCollisionLoadedAroundEntity(ent) do
-        if GetGameTimer() - tempTimer > 3000 then
-            break
-        end
-
-        Citizen.Wait(0)
-    end
-
-    local foundNewZ, newZ
-    if not trustPos then
-        foundNewZ, newZ = GetGroundZCoordWithOffsets(x, y, z)
-        tempTimer = GetGameTimer()
-        while not foundNewZ do
-            z = z + 10.0
-            foundNewZ, newZ = GetGroundZCoordWithOffsets(x, y, z)
-            Wait(0)
-
-            if GetGameTimer() - tempTimer > 2000 then
-                break
-            end
+    for _, value in pairs(list) do
+        value = Utils.Trim(tostring(value))
+        if value ~= "" and not seen[value] then
+            seen[value] = true
+            result[#result + 1] = value
+            if max and #result >= max then break end
         end
     end
 
-    LastCoords = vector3(x, y, foundNewZ and newZ or z)
-    SetEntityCoordsNoOffset(ent, x, y, foundNewZ and newZ or z)
-
-    if type(pos) ~= "vector3" and pos.w then SetEntityHeading(ent, pos.w) end
-    return true
-end
-
-if IsDuplicityVersion() then
-    function Notify(source, message)
-        TriggerClientEvent("esx:showNotification", source, message)
-    end
-
-    function GetItemLabel(item)
-        return ESX.GetItemLabel(item) or item
-    end
-else
-    function ShowNotification(message)
-        BeginTextCommandThefeedPost("STRING")
-        AddTextComponentSubstringPlayerName(message)
-        EndTextCommandThefeedPostTicker(false, true)
-    end
-
-    function ShowHelpNotification(message)
-        BeginTextCommandDisplayHelp("STRING")
-        AddTextComponentSubstringPlayerName(message)
-        EndTextCommandDisplayHelp(0, false, true, -1)
-    end
+    return result
 end

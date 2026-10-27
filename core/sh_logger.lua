@@ -1,7 +1,6 @@
 Logger = {}
-Logger.Enabled = GetConvarInt("sh_dev", 1) == 1 and true or false
-
-Logger.LogLevel = GetConvarInt("sh_log_level", Logger.Enabled and 3 or 0)
+Logger.Debug = GetConvarInt("sx_doors_debug", 0) == 1
+Logger.LogLevel = GetConvarInt("sx_doors_log_level", Logger.Debug and 3 or 2)
 
 local LOG_LEVELS = {
     ERROR = 0,
@@ -11,12 +10,13 @@ local LOG_LEVELS = {
 }
 
 local function parseArguments(...)
-    local arguments = {...}
+    local arguments = { ... }
     local parsedArguments = {}
 
-    for _,v in pairs(arguments) do
+    for i = 1, select("#", ...) do
+        local v = arguments[i]
         if type(v) == "table" then
-            parsedArguments[#parsedArguments + 1] = table.ToString(v)
+            parsedArguments[#parsedArguments + 1] = json.encode(v)
         else
             parsedArguments[#parsedArguments + 1] = tostring(v)
         end
@@ -25,28 +25,24 @@ local function parseArguments(...)
     return parsedArguments
 end
 
-function Logger:error(module, ...)
-    if not self.Enabled then return end
-    if self.LogLevel < LOG_LEVELS.ERROR then return end
+local function log(level, color, tag, module, ...)
+    if Logger.LogLevel < level then return end
 
-    print("^1[ERROR] ^6[" .. string.upper(module) .. "] > ^5" .. table.concat(parseArguments(...), " ") .. "^0")
+    print(color .. "[" .. tag .. "] ^6[" .. string.upper(module) .. "] > ^5" .. table.concat(parseArguments(...), " ") .. "^0")
 end
 
-function Logger:info(module, ...)
-    if not self.Enabled then return end
-    if self.LogLevel < LOG_LEVELS.INFO then return end
-
-    print("^2[INFO] ^6[" .. string.upper(module) .. "] > ^5" .. table.concat(parseArguments(...), " ") .. "^0")
+function Logger:error(module, ...)
+    log(LOG_LEVELS.ERROR, "^1", "ERROR", module, ...)
 end
 
 function Logger:warn(module, ...)
-    if not self.Enabled then return end
-    if self.LogLevel < LOG_LEVELS.WARN then return end
+    log(LOG_LEVELS.WARN, "^3", "WARN", module, ...)
+end
 
-    print("^3[WARN] ^6[" .. string.upper(module) .. "] > ^5" .. table.concat(parseArguments(...), " ") .. "^0")
+function Logger:info(module, ...)
+    log(LOG_LEVELS.INFO, "^2", "INFO", module, ...)
 end
 
 function Logger:trace(module, ...)
-
-    print("^8[TRACE] ^6[" .. string.upper(module) .. "] > ^5" .. table.concat(parseArguments(...), " ") .. "^0")
+    log(LOG_LEVELS.TRACE, "^8", "TRACE", module, ...)
 end
