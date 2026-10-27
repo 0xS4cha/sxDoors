@@ -8,9 +8,6 @@ local PinAttempts = {}
 
 local MAX_ENTITIES = 4
 
-------------------------------------------------------------------------
--- Door class
-------------------------------------------------------------------------
 
 Door = newClass()
 
@@ -28,7 +25,6 @@ function Door:init(id, data, locked)
     end
 end
 
--- data must be sanitized with SanitizeDoorData before
 function Door:apply(data)
     self.label = data.label
     self.type = data.type
@@ -62,7 +58,6 @@ function Door:toData()
     }
 end
 
--- What every client receives: no pin and no access list
 function Door:toClient()
     return {
         id = self.id,
@@ -106,9 +101,6 @@ function Door:isLocked()
     return self.locked
 end
 
----@param locked boolean
----@param source number|nil player that changed the state, nil for the server
----@param reason string|nil toggle, lockpick, autolock, admin, export
 function Door:setState(locked, source, reason)
     locked = locked == true
     if self.locked == locked then return false end
@@ -144,9 +136,6 @@ function Door:setState(locked, source, reason)
     return true
 end
 
-------------------------------------------------------------------------
--- Validation
-------------------------------------------------------------------------
 
 local function sanitizeEntities(entities)
     local result = {}
@@ -173,7 +162,6 @@ local function sanitizeAccess(access)
 
     if type(access.jobs) == 'table' then
         for key, value in pairs(access.jobs) do
-            -- Accepts { police = 0 }, { "police" } and { { name = "police", grade = 0 } }
             local name, grade
             if type(key) == 'string' then
                 name, grade = key, value
@@ -198,8 +186,6 @@ local function sanitizeAccess(access)
     }
 end
 
----Validates any door payload coming from the admin panel or an export
----@return table|nil data, string|nil error
 function SanitizeDoorData(input, current)
     if type(input) ~= 'table' then return nil, 'invalid_data' end
     current = current or {}
@@ -251,9 +237,6 @@ function SanitizeDoorData(input, current)
     }
 end
 
-------------------------------------------------------------------------
--- Registry
-------------------------------------------------------------------------
 
 function GetDoorFromId(id)
     return DoorsList[id]
@@ -275,7 +258,6 @@ function GenerateDoorId()
     return id
 end
 
----@return Door|nil door, string|nil error
 function CreateDoor(input, source)
     local data, err = SanitizeDoorData(input)
     if not data then return nil, err end
@@ -294,7 +276,6 @@ function CreateDoor(input, source)
     return door
 end
 
----@return Door|nil door, string|nil error
 function UpdateDoor(id, input, source)
     local door = DoorsList[id]
     if not door then return nil, 'not_found' end
@@ -349,10 +330,6 @@ function GetClosestDoorFromCoords(coords, maxDistance)
     return closest, closest and closestDistance or nil
 end
 
-------------------------------------------------------------------------
--- Access
-------------------------------------------------------------------------
-
 local function hasAccessRules(access)
     return next(access.jobs) ~= nil or #access.aces > 0 or #access.identifiers > 0 or #access.items > 0
 end
@@ -401,7 +378,6 @@ local function registerWrongPin(source, door)
     return Config.Pin.maxAttempts - attempts.count
 end
 
----@return boolean allowed, string|nil reason
 function CanPlayerUseDoor(source, door, pin)
     if Config.Admin.bypass and Bridge.IsAdmin(source) then return true end
 
@@ -423,7 +399,6 @@ function CanPlayerUseDoor(source, door, pin)
 end
 
 function IsPlayerNearDoor(source, door, tolerance)
-    -- Without OneSync the server does not know the player position and cannot check it
     local ped = GetPlayerPed(source)
     if not ped or ped == 0 then return true end
 
@@ -442,9 +417,6 @@ local function isOnCooldown(source)
     return false
 end
 
-------------------------------------------------------------------------
--- Loading
-------------------------------------------------------------------------
 
 local function loadDoors()
     Storage.Init()
@@ -453,7 +425,6 @@ local function loadDoors()
     for _, record in ipairs(Storage.LoadAll()) do
         local input = record.data
         input.label = record.label
-        -- The stored pin is trusted even if Config.Pin lengths changed since
         local pin = input.pin
         input.pin = nil
         local data, err = SanitizeDoorData(input, { createdAt = input.createdAt, pin = pin })
@@ -525,10 +496,6 @@ function SX.Doors:InitializeAsync()
     loadDoors()
 end
 
-------------------------------------------------------------------------
--- Legacy import
-------------------------------------------------------------------------
-
 RegisterCommand('sxdoors_migrate', function(source)
     if source > 0 then return end
 
@@ -555,7 +522,6 @@ RegisterCommand('sxdoors_migrate', function(source)
                     coords = okCoords and coords or nil,
                     distance = tonumber(row.distance),
                     pin = pin > 0 and tostring(pin) or nil,
-                    -- The legacy status was true when the door was open
                     defaultLocked = not (tonumber(row.default_status) == 1),
                     access = { jobs = okJobs and jobs or {} },
                 })

@@ -1,25 +1,20 @@
 AddLanguage("en", {
-    -- Key bindings
     keymap_interact = "Lock or unlock a door",
     keymap_admin_panel = "Open the doors admin panel",
 
-    -- In game prompt
     prompt_locked = "~r~Locked",
     prompt_unlocked = "~g~Unlocked",
     prompt_action_unlock = "Unlock",
     prompt_action_lock = "Lock",
 
-    -- Door picker
     picker_help = "~INPUT_CONTEXT~ Select a door (%d/%d)~n~~INPUT_FRONTEND_ACCEPT~ Confirm~n~~INPUT_FRONTEND_RRIGHT~ Cancel",
 
-    -- Lockpick
     lockpick_progress = "Lockpicking... %d%%~n~~INPUT_FRONTEND_RRIGHT~ Cancel",
     notify_lockpick_broken = "Your lockpick ~r~broke~s~.",
     notify_lockpick_cancelled = "Lockpicking ~r~cancelled~s~.",
     notify_lockpick_success = "The door is ~g~unlocked~s~.",
     notify_no_lockpickable_door = "There is no door you can lockpick nearby.",
 
-    -- Notifications
     notify_server_timeout = "The server did not answer, try again.",
     notify_door_created = "Door ~g~%s~s~ created.",
     notify_door_updated = "Door ~b~%s~s~ updated.",
@@ -29,7 +24,6 @@ AddLanguage("en", {
     notify_debug_off = "Door debug ~r~disabled~s~.",
     admin_no_permission = "You are not allowed to do this.",
 
-    -- Refusal reasons, shared with the interface
     reason_not_found = "This door no longer exists.",
     reason_too_far = "You are too far from the door.",
     reason_denied = "You do not have the key of this door.",
@@ -45,7 +39,6 @@ AddLanguage("en", {
     reason_missing_item = "You need a lockpick.",
     reason_lockpick_failed = "You failed to lockpick the door.",
 
-    -- Discord logs
     webhook_door = "Door",
     webhook_player = "Player",
     webhook_lock = "Door locked",
@@ -55,10 +48,6 @@ AddLanguage("en", {
     webhook_delete = "Door deleted",
     webhook_lockpick = "Door lockpicked",
     webhook_pin_failed = "Wrong door code",
-
-    ------------------------------------------------------------------
-    -- Interface
-    ------------------------------------------------------------------
 
     btn_close = "Close",
     btn_cancel = "Cancel",

@@ -20,8 +20,6 @@ local function sendTranslations()
     })
 end
 
----@param panel 'admin'|'keypad'
----@param data table|nil
 function SX.UI:Open(panel, data)
     currentPanel = panel
     isOpen = true
@@ -41,7 +39,6 @@ function SX.UI:Close()
     self:Send('setVisible', { visible = false })
 end
 
--- Hides the interface without losing its state, used by the door picker
 function SX.UI:Hide()
     SetNuiFocus(false, false)
     self:Send('setVisible', { visible = false })
@@ -92,7 +89,6 @@ function SX.UI:Initialize()
         cb(result)
 
         if result.ok then
-            -- Leaves the success state visible for a moment
             SetTimeout(600, function()
                 if keypadDoor == doorId then SX.UI:Close() end
             end)

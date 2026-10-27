@@ -58,9 +58,6 @@ local function sendWebhook(entry)
     }), { ['Content-Type'] = 'application/json' })
 end
 
----@param kind string lock, unlock, create, update, delete, lockpick, pin_failed, denied
----@param door table
----@param source number|nil
 function Activity.Add(kind, door, source)
     counter = counter + 1
 

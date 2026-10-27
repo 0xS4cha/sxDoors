@@ -12,7 +12,6 @@ local function loadDict(dict)
     while not HasAnimDictLoaded(dict) and GetGameTimer() < timeout do Wait(0) end
 end
 
----Lockpicks the closest lockpickable door, returns false when no door can be lockpicked
 function SX.Lockpick:Start()
     if Lockpicking or not Config.Lockpick.enabled then return false end
 

@@ -1,7 +1,3 @@
--- sxDoors
--- This table is created automatically on the first start when oxmysql is used.
--- Importing this file is only needed if your database user cannot create tables.
-
 CREATE TABLE IF NOT EXISTS `sx_doors` (
   `id` varchar(50) NOT NULL,
   `label` varchar(100) NOT NULL,

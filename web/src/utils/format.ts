@@ -33,7 +33,6 @@ export function jobLabel(name: string, grade: number, jobs: JobItem[]): string {
   return grade > 0 ? `${job.label} ≥ ${gradeLabel ?? grade}` : job.label
 }
 
-// CEF does not always expose navigator.clipboard
 export function copyToClipboard(text: string): void {
   const area = document.createElement('textarea')
   area.value = text

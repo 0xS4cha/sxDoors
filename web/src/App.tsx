@@ -25,7 +25,6 @@ export default function App() {
   const [keypad, setKeypad] = useState<KeypadData | null>(isEnvBrowser() ? MOCK_KEYPAD : null)
   const [openCount, setOpenCount] = useState(0)
 
-  // Keeps the translation listeners mounted for the whole life of the interface
   useTranslation()
 
   const handleSetVisible = useCallback(({ visible: nextVisible }: SetVisibleData) => {

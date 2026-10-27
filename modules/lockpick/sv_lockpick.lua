@@ -3,10 +3,6 @@ SX.Modules:Register("Lockpick", 30)
 
 local Pending = {}
 
----Tries to lockpick a door for a player, returns ok and a reason
----@param source number
----@param id string
----@param skipItem boolean|nil true when the caller already handled the item
 function LockpickDoor(source, id, skipItem)
     local door = GetDoorFromId(id)
     if not door then return false, 'not_found' end
@@ -36,7 +32,6 @@ end
 function SX.Lockpick:Initialize()
     if not Config.Lockpick.enabled then return end
 
-    -- The client asks to start, the server answers only after the animation duration
     RegisterServerCallback('sxDoors:lockpick:start', function(source, id)
         local door = GetDoorFromId(id)
         if not door or not door.lockpick or not door.locked then return { ok = false, reason = 'not_lockpickable' } end
@@ -50,7 +45,6 @@ function SX.Lockpick:Initialize()
         local pending = Pending[source]
         Pending[source] = nil
 
-        -- Rejects clients that skip the animation
         if not pending or pending.id ~= id or GetGameTimer() - pending.time < Config.Lockpick.duration - 500 then
             return { ok = false, reason = 'denied' }
         end
