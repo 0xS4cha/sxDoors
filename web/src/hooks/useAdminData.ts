@@ -23,7 +23,6 @@ const EMPTY_DATA: AdminData = {
   },
 }
 
-// Lua encodes empty tables as arrays, the interface always works with objects
 function normalizeDoor(door: DoorItem): DoorItem {
   const access = door.access ?? { jobs: {}, groups: {}, aces: [], identifiers: [], items: [] }
   return {
@@ -51,7 +50,6 @@ function normalizeData(data: AdminData): AdminData {
   }
 }
 
-// fetchNui throws when the callback answers ok = false, the views only deal with results
 async function callNui(event: string, data?: unknown): Promise<ActionResult> {
   try {
     return (await fetchNui<ActionResult>(event, data)) ?? { ok: false, error: 'timeout' }

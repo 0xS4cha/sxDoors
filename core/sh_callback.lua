@@ -4,12 +4,8 @@ local handlers = {};
 local resourceName = GetCurrentResourceName();
 local REQUEST_EVENT = resourceName .. ":callback:request";
 local RESPONSE_EVENT = resourceName .. ":callback:response";
----@type table<number, PendingRPC>
 local pendings = {};
 
----@param eventName string
----@param source number
----@vararg any
 local function triggerNet(eventName, source, ...)
     if (isServer) then
         TriggerClientEvent(eventName, source, ...);
@@ -18,15 +14,11 @@ local function triggerNet(eventName, source, ...)
     end
 end
 
----@param v any
----@return boolean
 local function isFunction(v)
     return type(v) == "function"
             or type(v) == "table" and rawget(v, "__cfx_functionReference");
 end
 
----@param eventName string
----@param handlerFn fun(...: any): void
 local function createProxyHandler(eventName, handlerFn)
     return function(source, ...)
         if (isServer) then
@@ -36,7 +28,6 @@ local function createProxyHandler(eventName, handlerFn)
     end;
 end
 
----@param requestId number
 local function createTimeout(requestId)
     SetTimeout(15000, function()
         if (pendings[requestId]) then
@@ -46,8 +37,6 @@ local function createTimeout(requestId)
     end);
 end
 
----@param eventName string
----@param handlerFn fun(src: number, ...: any): void
 local function register(eventName, handlerFn)
     assert(type(eventName) == "string", ("Invalid argument at index #1, expected string, got '%s'"):format(type(eventName)));
     assert(isFunction(handlerFn), ("Invalid argument at index #2, expected function, got '%s'"):format(type(handlerFn)));
@@ -55,9 +44,6 @@ local function register(eventName, handlerFn)
     handlers[eventName] = createProxyHandler(eventName, handlerFn);
 end
 
----@param eventName string
----@param source number
----@vararg any
 local function trigger(eventName, source, ...)
     assert(type(eventName) == "string", ("Invalid argument at index #1, expected string, got '%s'"):format(type(eventName)));
     assert((isServer and type(source) == "number") or true, ("Invalid argument at index #2, expected number, got '%s'"):format(type(source)));
@@ -104,31 +90,20 @@ end);
 
 if (isServer) then
 
-    ---@param eventName string
-    ---@param handlerFn fun(src: number, ...: any): void
     function RegisterServerCallback(eventName, handlerFn)
         return register(eventName, handlerFn);
     end
 
-    ---@param source number
-    ---@param eventName string
-    ---@vararg any
-    ---@return any
     function TriggerClientCallback(source, eventName, ...)
         return trigger(eventName, source, ...);
     end
 
 else
 
-    ---@param eventName string
-    ---@param handlerFn fun(...: any): void
-    ---@return void
     function RegisterClientCallback(eventName, handlerFn)
         return register(eventName, handlerFn);
     end
 
-    ---@param eventName string
-    ---@vararg any
     function TriggerServerCallback(eventName, ...)
         return trigger(eventName, nil, ...);
     end

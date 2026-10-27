@@ -16,10 +16,6 @@ end
 
 Storage.Name = detectStorage()
 
-------------------------------------------------------------------------
--- oxmysql
-------------------------------------------------------------------------
-
 local function query(sql, params)
     local p = promise.new()
     exports.oxmysql:query(sql, params or {}, function(result)
@@ -31,10 +27,6 @@ end
 local function execute(sql, params)
     exports.oxmysql:query(sql, params or {})
 end
-
-------------------------------------------------------------------------
--- JSON file
-------------------------------------------------------------------------
 
 local jsonRecords = {}
 local jsonDirty = false
@@ -71,16 +63,12 @@ local function writeJson()
     jsonDirty = false
 end
 
--- Several changes in the same tick only write the file once
 local function scheduleJsonWrite()
     if jsonDirty then return end
     jsonDirty = true
     SetTimeout(250, writeJson)
 end
 
-------------------------------------------------------------------------
--- API
-------------------------------------------------------------------------
 
 function Storage.Init()
     if Storage.Name == 'mysql' then
@@ -104,8 +92,6 @@ function Storage.Init()
 
     Logger:info('STORAGE', "Storage:", Storage.Name)
 end
-
----@return table[] records { id, label, data, locked }
 function Storage.LoadAll()
     local records = {}
 
@@ -167,7 +153,6 @@ function Storage.Delete(id)
     end
 end
 
--- Rows of the legacy `doors` table used by the previous version of the script
 function Storage.LoadLegacy()
     if Storage.Name ~= 'mysql' then return nil end
 

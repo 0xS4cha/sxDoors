@@ -106,7 +106,6 @@ export function OptionRow({ icon, title, description, checked, onChange }: { ico
   )
 }
 
-// Free text list (items, aces, identifiers), validated with Enter or comma
 export function TagInput({ values, onChange, placeholder }: { values: string[]; onChange: (values: string[]) => void; placeholder?: string }) {
   const [draft, setDraft] = useState('')
 

@@ -17,7 +17,6 @@ local selectedLanguage = autoLanguage
 function AddLanguage(name, tbl)
     local old = registeredLanguages[name] or {}
     registeredLanguages[name] = tbl
-    -- Keep the phrases added through AddPhrase before the language file was loaded
     for k, v in pairs(old) do
         if not registeredLanguages[name][k] then
             registeredLanguages[name][k] = v

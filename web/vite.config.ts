@@ -6,7 +6,6 @@ import tailwindcss from '@tailwindcss/vite'
 
 const VIRTUAL_ID = 'virtual:dev-translations'
 
-// Exposes translations/<lang>.lua to the browser preview, the game sends them through NUI messages
 function devTranslations(): Plugin {
   return {
     name: 'sxdoors-dev-translations',

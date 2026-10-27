@@ -9,7 +9,6 @@ interface NuiWrapperProps {
   children: ReactNode
 }
 
-// Children stay mounted while hidden so the admin keeps its form during the door picker
 export function NuiWrapper({ visible, compact = false, children }: NuiWrapperProps) {
   const handleClose = () => {
     void fetchNui('close')

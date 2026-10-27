@@ -10,9 +10,7 @@ local Loaded = false
 local INTERACT_COMMAND = 'sxdoors_interact'
 local AUTOMATIC_TYPES = { sliding = true, garage = true }
 
-------------------------------------------------------------------------
--- Door system
-------------------------------------------------------------------------
+
 
 local function getEntityHash(id, index)
     return joaat(('sxdoors:%s:%d'):format(id, index))
@@ -50,7 +48,6 @@ local function registerDoor(door)
             DoorSystemSetAutomaticDistance(hash, math.max(door.distance, 5.0), false, false)
         end
 
-        -- Forces the door back to its closed position before applying the real state
         DoorSystemSetDoorState(hash, 4, false, false)
         door.hashes[#door.hashes + 1] = hash
     end
@@ -74,10 +71,6 @@ local function syncDoors(list)
     end
     Loaded = true
 end
-
-------------------------------------------------------------------------
--- Feedback
-------------------------------------------------------------------------
 
 local function playSound(name)
     local sound = Config.Interaction.sounds[name]
@@ -122,9 +115,6 @@ local function drawText3D(coords, text)
     ClearDrawOrigin()
 end
 
-------------------------------------------------------------------------
--- Interaction
-------------------------------------------------------------------------
 
 local function handleResult(door, result)
     if not result then
@@ -143,7 +133,6 @@ local function handleResult(door, result)
     end
 end
 
----Toggles a door, asking for the pin code when the server requires it
 function SX.Doors:Use(id)
     local door = DoorsList[id]
     if not door or Busy then return false end
@@ -165,7 +154,6 @@ function SX.Doors:Use(id)
     return true
 end
 
----Sends a pin from the keypad, returns the server answer to the interface
 function SX.Doors:SubmitPin(id, pin)
     local door = DoorsList[id]
     if not door then return { ok = false, reason = 'not_found' } end
@@ -208,11 +196,13 @@ function SX.Doors:IsLoaded()
     return Loaded
 end
 
-------------------------------------------------------------------------
--- Threads
-------------------------------------------------------------------------
 
 local function closestThread()
+    RequestStreamedTextureDict('icons', 1)
+	while not HasStreamedTextureDictLoaded('icons') do
+		Wait(50)
+		Logger:warn('INTERACTIONS', "wait texture")
+	end
     while true do
         local coords = GetEntityCoords(PlayerPedId())
         local closest, closestDistance = nil, math.huge
@@ -248,6 +238,14 @@ local function promptThread()
 
             if mode == 'help' then
                 Bridge.ShowHelp(('%s~n~~INPUT_%X~ %s'):format(state, (joaat(INTERACT_COMMAND) & 0xFFFFFFFF) | 0x80000000, action))
+            elseif mode == 'sprite' then
+                Utils.DrawSprite3d({
+                    pos = door.vector,
+                    textureDict = 'icons',
+                    textureName = door.locked and 'key_red' or 'key_green',
+                    width = 0.0185,
+                    height = 0.0333
+                }, false)
             else
                 drawText3D(door.vector, ('%s~n~~w~[~y~%s~w~] %s'):format(state, keyLabel, action))
             end
@@ -257,10 +255,6 @@ local function promptThread()
         end
     end
 end
-
-------------------------------------------------------------------------
--- Module
-------------------------------------------------------------------------
 
 function SX.Doors:Initialize()
     RegisterCommand(INTERACT_COMMAND, function()

@@ -52,7 +52,6 @@ export function AdminPanel({ visible, openCount }: { visible: boolean; openCount
     highlightDoor,
   } = useAdminData()
 
-  // Fresh data every time the panel is opened from the game
   useEffect(() => {
     if (visible && openCount > 0) void refresh()
   }, [openCount, refresh, visible])

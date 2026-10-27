@@ -1,25 +1,20 @@
 AddLanguage("fr", {
-    -- Touches
     keymap_interact = "Verrouiller ou déverrouiller une porte",
     keymap_admin_panel = "Ouvrir le panel admin des portes",
 
-    -- Prompt en jeu
     prompt_locked = "~r~Verrouillée",
     prompt_unlocked = "~g~Déverrouillée",
     prompt_action_unlock = "Déverrouiller",
     prompt_action_lock = "Verrouiller",
 
-    -- Sélection des portes
     picker_help = "~INPUT_CONTEXT~ Sélectionner une porte (%d/%d)~n~~INPUT_FRONTEND_ACCEPT~ Valider~n~~INPUT_FRONTEND_RRIGHT~ Annuler",
 
-    -- Crochetage
     lockpick_progress = "Crochetage... %d%%~n~~INPUT_FRONTEND_RRIGHT~ Annuler",
     notify_lockpick_broken = "Votre crochet s'est ~r~cassé~s~.",
     notify_lockpick_cancelled = "Crochetage ~r~annulé~s~.",
     notify_lockpick_success = "La porte est ~g~déverrouillée~s~.",
     notify_no_lockpickable_door = "Aucune porte crochetable à proximité.",
 
-    -- Notifications
     notify_server_timeout = "Le serveur n'a pas répondu, réessayez.",
     notify_door_created = "Porte ~g~%s~s~ créée.",
     notify_door_updated = "Porte ~b~%s~s~ modifiée.",
@@ -29,7 +24,6 @@ AddLanguage("fr", {
     notify_debug_off = "Debug des portes ~r~désactivé~s~.",
     admin_no_permission = "Vous n'avez pas la permission.",
 
-    -- Raisons de refus, partagées avec l'interface
     reason_not_found = "Cette porte n'existe plus.",
     reason_too_far = "Vous êtes trop loin de la porte.",
     reason_denied = "Vous n'avez pas la clé de cette porte.",
@@ -45,7 +39,6 @@ AddLanguage("fr", {
     reason_missing_item = "Il vous faut un crochet.",
     reason_lockpick_failed = "Vous n'avez pas réussi à crocheter la porte.",
 
-    -- Logs Discord
     webhook_door = "Porte",
     webhook_player = "Joueur",
     webhook_lock = "Porte verrouillée",
@@ -55,10 +48,6 @@ AddLanguage("fr", {
     webhook_delete = "Porte supprimée",
     webhook_lockpick = "Porte crochetée",
     webhook_pin_failed = "Code de porte incorrect",
-
-    ------------------------------------------------------------------
-    -- Interface
-    ------------------------------------------------------------------
 
     btn_close = "Fermer",
     btn_cancel = "Annuler",

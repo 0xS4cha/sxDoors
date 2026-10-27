@@ -4,13 +4,9 @@ SX.Modules:Register("Admin", 20)
 local Picking = false
 local DebugEnabled = false
 
-local CONTROL_SELECT = 38   -- E
-local CONTROL_CONFIRM = 191 -- Enter
-local CONTROL_CANCEL = 194  -- Backspace
-
-------------------------------------------------------------------------
--- Helpers
-------------------------------------------------------------------------
+local CONTROL_SELECT = 38
+local CONTROL_CONFIRM = 191
+local CONTROL_CANCEL = 194
 
 local function rotationToDirection(rotation)
     local z = math.rad(rotation.z)
@@ -55,12 +51,7 @@ local function teleport(coords)
     DoScreenFadeIn(400)
 end
 
-------------------------------------------------------------------------
--- Picker
-------------------------------------------------------------------------
 
----Lets the admin aim at door entities in game, the result is sent back to the interface
----@param max number maximum number of entities
 function SX.Admin:StartPicker(max)
     if Picking then return end
     Picking = true
@@ -148,7 +139,6 @@ function SX.Admin:IsPicking()
     return Picking
 end
 
--- Outlines the entities of a door for a few seconds
 function SX.Admin:Highlight(id, duration)
     local door = SX.Doors:Get(id)
     if not door then return end
@@ -183,9 +173,6 @@ function SX.Admin:Highlight(id, duration)
     end)
 end
 
-------------------------------------------------------------------------
--- Debug overlay
-------------------------------------------------------------------------
 
 local function debugThread()
     while DebugEnabled do
@@ -212,9 +199,6 @@ local function debugThread()
     end
 end
 
-------------------------------------------------------------------------
--- Module
-------------------------------------------------------------------------
 
 local function adminCall(name, ...)
     return TriggerServerCallback(name, ...) or { ok = false, error = 'timeout' }

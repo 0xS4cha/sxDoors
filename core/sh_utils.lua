@@ -40,7 +40,6 @@ function Utils.ToModel(model)
     return joaat(model)
 end
 
--- Center of every door entity, used as interaction point when none is given
 function Utils.GetCenter(entities)
     local x, y, z, count = 0.0, 0.0, 0.0, 0
     for _, entity in ipairs(entities or {}) do
@@ -72,4 +71,46 @@ function Utils.StringList(list, max)
     end
 
     return result
+end
+
+
+function Utils.DrawSprite3d(data, dontDrawHowOfScreen)
+    if dontDrawHowOfScreen == nil then
+        dontDrawHowOfScreen = false
+    end
+
+    local draw = false
+    if dontDrawHowOfScreen == false then
+        draw = true
+    else
+        local get, x, y = GetScreenCoordFromWorldCoord(data.pos.x, data.pos.y, data.pos.z)
+        if not get or x < 0.0 or x > 1.0 or y < 0.0 or y > 1.0 then
+            draw = false
+        else
+            draw = true
+        end
+    end
+
+    if draw then
+        local dist = #(GetGameplayCamCoords().xy - data.pos.xy)
+        
+        local fov = (1 / GetGameplayCamFov()) * 100
+        local scale = ((1 / dist) * 2) * fov
+        SetDrawOrigin(data.pos.x, data.pos.y, data.pos.z, 0)
+        DrawSprite(
+            data.textureDict,
+            data.textureName,
+            (data.x or 0) * scale,
+            (data.y or 0) * scale,
+            data.width * scale,
+            data.height * scale,
+            data.heading or 0,
+            data.r or 255,
+            data.g or 255,
+            data.b or 255,
+            data.a or 255
+        )
+        ClearDrawOrigin()
+    end
+    return draw
 end

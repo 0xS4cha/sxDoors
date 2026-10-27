@@ -41,7 +41,6 @@ export function groupLabel(id: string, grade: number, groups: IllegalGroup[], an
   return `${name} ≥ ${rank}`
 }
 
-// CEF does not always expose navigator.clipboard
 export function copyToClipboard(text: string): void {
   const area = document.createElement('textarea')
   area.value = text
