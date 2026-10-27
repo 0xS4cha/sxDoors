@@ -19,6 +19,14 @@ A FiveM door lock resource for **ESX or standalone** servers. Doors are created 
 - **Translations**: English and French, shared between Lua and the interface.
 - **Exports**: a server and client API to drive doors from your other resources.
 
+<div align="center">
+
+![Codexion Visualizer](previews/image2.png)
+![Codexion Visualizer](previews/image3.png)
+![Codexion Visualizer](previews/image.png)
+
+</div>
+
 ## Dependencies
 
 None are required.
