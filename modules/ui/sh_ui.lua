@@ -1,0 +1,1 @@
+SX.Modules:Register("UI")

@@ -1,0 +1,8 @@
+-- exports("GetLaboratory", function(labId)
+--     for _, data in pairs(Labs.Table or {}) do
+--         if data.id == labId then
+--             return SerializeLaboratory(data)
+--         end
+--     end
+--     return nil
+-- end)
