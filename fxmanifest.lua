@@ -1,48 +1,42 @@
 fx_version 'cerulean'
 game 'gta5'
 
-name 'sxIllegals'
-description 'Illegal groups, territories and laboratories'
-author 'sxIllegals'
+name 'sxDoors'
+description 'Door lock system with an in game admin panel, ESX or standalone'
+author '0xS4cha'
 version '1.0.0'
+repository 'https://github.com/0xS4cha/sxDoors'
 
 lua54 'yes'
 
-dependencies {
-    'es_extended',
-    'oxmysql',
-}
-
 shared_scripts {
-    '@es_extended/imports.lua',
+    'core/sh_logger.lua',
     'core/sh_translation.lua',
     'translations/*.lua',
-    'core/sh_logger.lua',
     'core/sh_modules.lua',
     'core/sh_class.lua',
     'core/sh_callback.lua',
-    'core/sh_utils.lua',
     'core/sh_generate.lua',
+    'core/sh_utils.lua',
     'shared/*.lua',
-    'modules/**/sh_*.lua',
 }
 
 client_scripts {
-    'core/cl_hook.lua',
-    'core/cl_entities.lua',
-    'core/cl_base.lua',
+    'bridge/cl_bridge.lua',
     'modules/**/cl_*.lua',
+    'core/sh_init.lua',
 }
 
 server_scripts {
-    '@oxmysql/lib/MySQL.lua',
+    'bridge/sv_bridge.lua',
+    'bridge/sv_storage.lua',
     'modules/**/sv_*.lua',
+    'core/sh_init.lua',
 }
 
 ui_page 'web/dist/index.html'
 
 files {
-    'core/MINIMAP_LOADER.gfx',
     'web/dist/index.html',
-    'web/dist/**/*'
+    'web/dist/**/*',
 }
