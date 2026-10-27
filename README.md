@@ -21,9 +21,9 @@ A FiveM door lock resource for **ESX or standalone** servers. Doors are created 
 
 <div align="center">
 
-![Codexion Visualizer](previews/image2.png)
-![Codexion Visualizer](previews/image3.png)
-![Codexion Visualizer](previews/image.png)
+![sxDoors](previews/image2.png)
+![sxDoors](previews/image3.png)
+![sxDoors](previews/image.png)
 
 </div>
 
