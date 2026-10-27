@@ -16,6 +16,7 @@ export interface DoorEntity {
 
 export interface DoorAccess {
   jobs: Record<string, number>
+  groups: Record<string, number>
   aces: string[]
   identifiers: string[]
   items: string[]
@@ -72,12 +73,21 @@ export interface JobItem {
   grades: JobGrade[]
 }
 
+export interface IllegalGroup {
+  id: string
+  name: string
+  color: string
+  ranks: JobGrade[]
+}
+
 export interface AdminSettings {
   pinMinLength: number
   pinMaxLength: number
   defaultDistance: number
   persistState: boolean
   lockpick: boolean
+  sxIllegals: boolean
+  anyGroupGrade: number
 }
 
 export interface AdminData {
@@ -86,6 +96,7 @@ export interface AdminData {
   doors: DoorItem[]
   activity: ActivityEntry[]
   jobs: JobItem[]
+  illegalGroups: IllegalGroup[]
   framework: 'esx' | 'standalone'
   storage: 'mysql' | 'json'
   settings: AdminSettings

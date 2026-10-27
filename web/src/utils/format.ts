@@ -1,4 +1,4 @@
-import type { ActivityEntry, DoorItem, JobItem } from '../types/doors'
+import type { ActivityEntry, DoorItem, IllegalGroup, JobItem } from '../types/doors'
 
 type Translate = (key: string, replacements?: Record<string, string | number>) => string
 
@@ -22,8 +22,8 @@ export function describeActivity(entry: ActivityEntry, t: Translate): string {
 }
 
 export function isRestricted(door: DoorItem): boolean {
-  const { jobs, aces, identifiers, items } = door.access
-  return Object.keys(jobs).length > 0 || aces.length > 0 || identifiers.length > 0 || items.length > 0 || door.hasPin
+  const { jobs, groups, aces, identifiers, items } = door.access
+  return Object.keys(jobs).length > 0 || Object.keys(groups).length > 0 || aces.length > 0 || identifiers.length > 0 || items.length > 0 || door.hasPin
 }
 
 export function jobLabel(name: string, grade: number, jobs: JobItem[]): string {
@@ -31,6 +31,14 @@ export function jobLabel(name: string, grade: number, jobs: JobItem[]): string {
   if (!job) return grade > 0 ? `${name} ≥ ${grade}` : name
   const gradeLabel = job.grades.find((g) => g.grade === grade)?.label
   return grade > 0 ? `${job.label} ≥ ${gradeLabel ?? grade}` : job.label
+}
+
+export function groupLabel(id: string, grade: number, groups: IllegalGroup[], anyGrade: number): string {
+  const group = groups.find((g) => g.id === id)
+  const name = group?.name ?? id
+  if (grade >= anyGrade) return name
+  const rank = group?.ranks.find((r) => r.grade === grade)?.label ?? grade
+  return `${name} ≥ ${rank}`
 }
 
 // CEF does not always expose navigator.clipboard

@@ -139,3 +139,54 @@ end
 function Bridge.Notify(source, message, kind)
     TriggerClientEvent('sxDoors:notify', source, message, kind or 'info')
 end
+
+function Bridge.HasIllegals()
+    local resource = Config.Integrations.sxIllegals
+    return resource and GetResourceState(resource) == 'started' or false
+end
+
+local function callIllegals(name, ...)
+    if not Bridge.HasIllegals() then return nil end
+
+    local resource = Config.Integrations.sxIllegals
+    local ok, a, b = pcall(function(...)
+        local proxy = exports[resource]
+        return proxy[name](proxy, ...)
+    end, ...)
+
+    if not ok then
+        Logger:warn('BRIDGE', 'sxIllegals export', name, 'failed:', a)
+        return nil
+    end
+    return a, b
+end
+
+function Bridge.GetIllegalGroup(source)
+    local group = callIllegals('GetPlayerGroup', source)
+    if not group then return nil end
+
+    local grade = callIllegals('GetPlayerGrade', source)
+    return group.id, tonumber(grade) or 0
+end
+
+function Bridge.GetIllegalGroups()
+    local result = {}
+    for _, group in ipairs(callIllegals('GetGroups') or {}) do
+        local ranks = {}
+        for _, rank in ipairs(group.ranks or {}) do
+            ranks[#ranks + 1] = { grade = tonumber(rank.rank) or 0, label = rank.name or tostring(rank.rank) }
+        end
+        table.sort(ranks, function(a, b) return a.grade < b.grade end)
+
+        local rgb = group.rgb or {}
+        result[#result + 1] = {
+            id = group.id,
+            name = group.name or group.id,
+            color = ('rgb(%d, %d, %d)'):format(tonumber(rgb.r) or 255, tonumber(rgb.g) or 255, tonumber(rgb.b) or 255),
+            ranks = ranks
+        }
+    end
+
+    table.sort(result, function(a, b) return a.name:lower() < b.name:lower() end)
+    return result
+end

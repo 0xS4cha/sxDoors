@@ -121,7 +121,7 @@ AddLanguage("fr", {
     overview_recent_activity = "Activité récente",
     overview_see_activity = "Tout voir",
 
-    doors_search = "Rechercher par nom, id, métier ou item...",
+    doors_search = "Rechercher par nom, id, métier, groupe ou item...",
     doors_type_all = "Tous les types",
     doors_create = "Nouvelle porte",
     doors_filter_all = "Toutes",
@@ -236,4 +236,12 @@ AddLanguage("fr", {
     keypad_checking = "Vérification...",
     keypad_success = "Accès autorisé",
     keypad_wrong = "Code incorrect, {n} essais restants",
+
+    modal_groups = "Groupes sxIllegals",
+    modal_groups_hint = "Les membres du groupe ayant au moins ce rang ont accès.",
+    modal_groups_hint_offline = "sxIllegals n'est pas démarré, ces règles sont ignorées tant qu'il ne tourne pas.",
+    modal_select_group = "Choisir un groupe",
+    modal_group_any_rank = "Tous les rangs",
+    modal_add_group = "Ajouter un groupe",
+    error_invalid_group = "Choisissez un groupe pour chaque règle ou supprimez les règles vides.",
 })

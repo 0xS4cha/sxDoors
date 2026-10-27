@@ -7,6 +7,7 @@ local Cooldowns = {}
 local PinAttempts = {}
 
 local MAX_ENTITIES = 4
+ANY_GROUP_GRADE = 999
 
 ------------------------------------------------------------------------
 -- Door class
@@ -167,6 +168,29 @@ local function sanitizeEntities(entities)
     return result
 end
 
+local function sanitizeGradeMap(input)
+    local result = {}
+    if type(input) ~= 'table' then return result end
+
+    for key, value in pairs(input) do
+        local name, grade
+        if type(key) == 'string' then
+            name, grade = key, value
+        elseif type(value) == 'table' then
+            name, grade = value.name or value.id, value.grade
+        else
+            name, grade = value, nil
+        end
+
+        name = Utils.Trim(tostring(name or ''))
+        if name ~= '' then
+            result[name] = math.max(0, math.floor(tonumber(grade) or 0))
+        end
+    end
+
+    return result
+end
+
 local function sanitizeAccess(access)
     access = type(access) == 'table' and access or {}
     local jobs = {}
@@ -190,8 +214,16 @@ local function sanitizeAccess(access)
         end
     end
 
+    local groups = sanitizeGradeMap(access.groups)
+    for id, grade in pairs(groups) do
+        if type(access.groups) == 'table' and access.groups[id] == true then
+            groups[id] = ANY_GROUP_GRADE
+        end
+    end
+
     return {
         jobs = jobs,
+        groups = groups,
         aces = Utils.StringList(access.aces, 32),
         identifiers = Utils.StringList(access.identifiers, 128),
         items = Utils.StringList(access.items, 32),
@@ -354,13 +386,20 @@ end
 ------------------------------------------------------------------------
 
 local function hasAccessRules(access)
-    return next(access.jobs) ~= nil or #access.aces > 0 or #access.identifiers > 0 or #access.items > 0
+    return next(access.jobs) ~= nil or next(access.groups) ~= nil or #access.aces > 0 or #access.identifiers > 0 or #access.items > 0
 end
 
 local function matchesAccess(source, access)
     local jobName, jobGrade = Bridge.GetJob(source)
     if jobName and access.jobs[jobName] and jobGrade >= access.jobs[jobName] then
         return true
+    end
+
+    if next(access.groups) ~= nil then
+        local groupId, groupGrade = Bridge.GetIllegalGroup(source)
+        if groupId and access.groups[groupId] and groupGrade <= access.groups[groupId] then
+            return true
+        end
     end
 
     for _, ace in ipairs(access.aces) do

@@ -6,7 +6,7 @@ A FiveM door lock resource for **ESX or standalone** servers. Doors are created 
 
 - **In game creation**: open the panel, press *Select*, aim at a door and press `E`. Double doors, sliding doors, garages and gates are supported.
 - **Native door system**: doors use `AddDoorToSystem`, so they close and lock smoothly, sliding doors and gates open by themselves once unlocked. No entity freezing.
-- **Access rules**: ESX jobs with a minimum grade, items, ACE permissions, identifiers and pin codes. A door with no rule is public. Admins can always open every door.
+- **Access rules**: ESX jobs with a minimum grade, sxIllegals criminal groups with a minimum rank, items, ACE permissions, identifiers and pin codes. A door with no rule is public. Admins can always open every door.
 - **Pin code keypad**: a NUI keypad with keyboard support. Codes are checked by the server only, and players are blocked for a while after too many wrong codes.
 - **Server authority**: the server checks the access, the distance between the player and the door and a cooldown for every request. Clients never receive pin codes or access lists.
 - **Auto lock**: a door can lock itself a few seconds after being opened.
@@ -27,6 +27,7 @@ None are required.
 | --- | --- |
 | [es_extended](https://github.com/esx-framework/esx_core) | Optional. Jobs, items, ESX admin groups, notifications and the usable lockpick item |
 | [oxmysql](https://github.com/overextended/oxmysql) | Optional. Database storage, otherwise doors are saved in `data/doors.json` |
+| [sxIllegals](https://github.com/0xS4cha/sxIllegals) | Optional. Access by criminal group and rank |
 
 The server should run with OneSync (default on recent artifacts) so the distance between players and doors can be checked.
 
@@ -93,6 +94,7 @@ The `sx_doors` table is created automatically on the first start. `db.sql` is on
 | Rule | Framework | Description |
 | --- | --- | --- |
 | Jobs | ESX | Job name and minimum grade, `{ police = 2 }` |
+| Groups | sxIllegals | Group id and minimum rank, `{ ["GRP-1720000000-AB12"] = 1 }`. Rank `0` is the leader, so a member passes when their rank is lower or equal. `true` accepts every rank |
 | Items | ESX | The player holds at least one of the items |
 | ACE | All | The player has one of the ACE permissions, for example `add_ace group.lspd sxdoors.lspd allow` |
 | Identifiers | All | `license:`, `discord:`, `steam:`, `fivem:` or the ESX identifier |
@@ -105,6 +107,7 @@ Everything lives in `shared/config.lua`.
 | Key | Default | Description |
 | --- | --- | --- |
 | `Config.Framework` | `'auto'` | `'auto'`, `'esx'` or `'standalone'` |
+| `Config.Integrations.sxIllegals` | `'sxIllegals'` | Resource name of sxIllegals. Group rules only apply while it is started, `false` disables them |
 | `Config.Storage` | `'auto'` | `'auto'` uses oxmysql when started, `'mysql'` or `'json'` force a storage |
 | `Config.PersistState` | `true` | Keeps the state of every door across restarts. When `false`, doors start in their default state |
 | `Config.Admin.groups` | `{ 'admin', 'superadmin' }` | ESX groups allowed to use the admin panel |
@@ -196,7 +199,7 @@ local door = exports.sxDoors:GetDoor("DOOR-AB12CD")
     lockpick = false,
     hidePrompt = false,
     hasPin = false,
-    access = { jobs = { police = 0 }, items = {}, aces = {}, identifiers = {} },
+    access = { jobs = { police = 0 }, groups = {}, items = {}, aces = {}, identifiers = {} },
     uses = 12
 }
 ```
@@ -272,6 +275,7 @@ Replaces the access rules of a door.
 
 ```lua
 exports.sxDoors:SetDoorAccess("DOOR-AB12CD", { jobs = { police = 0, sheriff = 0 }, aces = { "sxdoors.lspd" } })
+exports.sxDoors:SetDoorAccess("DOOR-EF34GH", { groups = { ["GRP-1720000000-AB12"] = true } })
 ```
 
 ##### `DeleteDoor(id)`

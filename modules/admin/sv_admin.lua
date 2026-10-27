@@ -30,6 +30,7 @@ function SX.Admin:Initialize()
             doors = getAdminDoors(),
             activity = Activity.GetAll(),
             jobs = Bridge.GetJobs(),
+            illegalGroups = Bridge.GetIllegalGroups(),
             framework = Bridge.Name,
             storage = Storage.Name,
             settings = {
@@ -38,6 +39,8 @@ function SX.Admin:Initialize()
                 defaultDistance = Config.Interaction.defaultDistance,
                 persistState = Config.PersistState,
                 lockpick = Config.Lockpick.enabled,
+                sxIllegals = Bridge.HasIllegals(),
+                anyGroupGrade = ANY_GROUP_GRADE,
             },
         }
     end)

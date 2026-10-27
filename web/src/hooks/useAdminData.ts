@@ -9,6 +9,7 @@ const EMPTY_DATA: AdminData = {
   doors: [],
   activity: [],
   jobs: [],
+  illegalGroups: [],
   framework: 'standalone',
   storage: 'json',
   settings: {
@@ -17,17 +18,20 @@ const EMPTY_DATA: AdminData = {
     defaultDistance: 2,
     persistState: true,
     lockpick: true,
+    sxIllegals: false,
+    anyGroupGrade: 999,
   },
 }
 
 // Lua encodes empty tables as arrays, the interface always works with objects
 function normalizeDoor(door: DoorItem): DoorItem {
-  const access = door.access ?? { jobs: {}, aces: [], identifiers: [], items: [] }
+  const access = door.access ?? { jobs: {}, groups: {}, aces: [], identifiers: [], items: [] }
   return {
     ...door,
     entities: door.entities ?? [],
     access: {
       jobs: Array.isArray(access.jobs) ? {} : access.jobs ?? {},
+      groups: Array.isArray(access.groups) ? {} : access.groups ?? {},
       aces: access.aces ?? [],
       identifiers: access.identifiers ?? [],
       items: access.items ?? [],
@@ -42,6 +46,8 @@ function normalizeData(data: AdminData): AdminData {
     doors: (data.doors ?? []).map(normalizeDoor),
     activity: data.activity ?? [],
     jobs: data.jobs ?? [],
+    illegalGroups: data.illegalGroups ?? [],
+    settings: { ...EMPTY_DATA.settings, ...data.settings },
   }
 }
 

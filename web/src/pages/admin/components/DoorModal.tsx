@@ -11,6 +11,7 @@ import {
   Plus,
   Settings2,
   ShieldCheck,
+  Skull,
   Trash2,
   Wrench,
   X,
@@ -18,7 +19,7 @@ import {
 import { Button, Field, IconButton, OptionRow, TagInput, TextInput, inputClass } from '../../../components/ui'
 import { useNuiEvent } from '../../../hooks/useNuiEvent'
 import { useTranslation } from '../../../hooks/useTranslation'
-import type { ActionResult, AdminSettings, DoorEntity, DoorItem, DoorPayload, DoorType, JobItem, PickerResult, Vec3 } from '../../../types/doors'
+import type { ActionResult, AdminSettings, DoorEntity, DoorItem, DoorPayload, DoorType, IllegalGroup, JobItem, PickerResult, Vec3 } from '../../../types/doors'
 import { fetchNui } from '../../../utils/fetchNui'
 import { formatCoords } from '../../../utils/format'
 import { isEnvBrowser } from '../../../utils/nui'
@@ -31,9 +32,15 @@ interface JobRule {
   grade: number
 }
 
+interface GroupRule {
+  id: string
+  grade: number
+}
+
 interface DoorModalProps {
   door: DoorItem | null
   jobs: JobItem[]
+  illegalGroups: IllegalGroup[]
   settings: AdminSettings
   onClose: () => void
   onSubmit: (payload: DoorPayload) => Promise<ActionResult>
@@ -47,7 +54,7 @@ function centerOf(entities: DoorEntity[]): Vec3 | null {
   return { x: round(sum.x / entities.length), y: round(sum.y / entities.length), z: round(sum.z / entities.length) }
 }
 
-export function DoorModal({ door, jobs, settings, onClose, onSubmit }: DoorModalProps) {
+export function DoorModal({ door, jobs, illegalGroups, settings, onClose, onSubmit }: DoorModalProps) {
   const { t } = useTranslation()
   const [tab, setTab] = useState<Tab>('general')
   const [label, setLabel] = useState(door?.label ?? '')
@@ -67,6 +74,9 @@ export function DoorModal({ door, jobs, settings, onClose, onSubmit }: DoorModal
   const [pin, setPin] = useState(door?.pin ?? '')
   const [jobRules, setJobRules] = useState<JobRule[]>(
     Object.entries(door?.access.jobs ?? {}).map(([name, grade]) => ({ name, grade })),
+  )
+  const [groupRules, setGroupRules] = useState<GroupRule[]>(
+    Object.entries(door?.access.groups ?? {}).map(([id, grade]) => ({ id, grade })),
   )
   const [items, setItems] = useState<string[]>(door?.access.items ?? [])
   const [aces, setAces] = useState<string[]>(door?.access.aces ?? [])
@@ -128,8 +138,9 @@ export function DoorModal({ door, jobs, settings, onClose, onSubmit }: DoorModal
       return { tab: 'access' as Tab, key: 'error_invalid_pin' }
     }
     if (jobRules.some((rule) => rule.name.trim() === '')) return { tab: 'access' as Tab, key: 'error_invalid_job' }
+    if (groupRules.some((rule) => rule.id === '')) return { tab: 'access' as Tab, key: 'error_invalid_group' }
     return null
-  }, [entities, jobRules, label, pin, settings.pinMaxLength, settings.pinMinLength])
+  }, [entities, groupRules, jobRules, label, pin, settings.pinMaxLength, settings.pinMinLength])
 
   const handleSubmit = async () => {
     if (validation) {
@@ -140,6 +151,9 @@ export function DoorModal({ door, jobs, settings, onClose, onSubmit }: DoorModal
 
     const jobsRecord: Record<string, number> = {}
     jobRules.forEach((rule) => { jobsRecord[rule.name.trim()] = Math.max(0, Math.floor(rule.grade)) })
+
+    const groupsRecord: Record<string, number> = {}
+    groupRules.forEach((rule) => { groupsRecord[rule.id] = Math.max(0, Math.floor(rule.grade)) })
 
     setSubmitting(true)
     const result = await onSubmit({
@@ -156,7 +170,7 @@ export function DoorModal({ door, jobs, settings, onClose, onSubmit }: DoorModal
       lockpick,
       hidePrompt,
       pin,
-      access: { jobs: jobsRecord, items, aces, identifiers },
+      access: { jobs: jobsRecord, groups: groupsRecord, items, aces, identifiers },
     })
     setSubmitting(false)
 
@@ -167,7 +181,7 @@ export function DoorModal({ door, jobs, settings, onClose, onSubmit }: DoorModal
   const tabs: { id: Tab; label: string; icon: typeof Settings2; count?: number }[] = [
     { id: 'general', label: t('modal_tab_general'), icon: Settings2 },
     { id: 'entities', label: t('modal_tab_entities'), icon: Crosshair, count: entities.length },
-    { id: 'access', label: t('modal_tab_access'), icon: ShieldCheck, count: jobRules.length + items.length + aces.length + identifiers.length + (pin ? 1 : 0) },
+    { id: 'access', label: t('modal_tab_access'), icon: ShieldCheck, count: jobRules.length + groupRules.length + items.length + aces.length + identifiers.length + (pin ? 1 : 0) },
   ]
 
   return (
@@ -416,6 +430,55 @@ export function DoorModal({ door, jobs, settings, onClose, onSubmit }: DoorModal
                   </button>
                 </div>
               </Field>
+
+              {(settings.sxIllegals || groupRules.length > 0) && (
+                <Field label={t('modal_groups')} hint={settings.sxIllegals ? t('modal_groups_hint') : t('modal_groups_hint_offline')}>
+                  <div className="space-y-2">
+                    {groupRules.map((rule, index) => {
+                      const group = illegalGroups.find((g) => g.id === rule.id)
+                      return (
+                        <div key={index} className="flex items-center gap-2">
+                          <Skull className="h-4 w-4 shrink-0" style={{ color: group?.color ?? '#71717a' }} />
+                          <select
+                            value={rule.id}
+                            onChange={(e) => setGroupRules((prev) => prev.map((r, i) => (i === index ? { id: e.target.value, grade: settings.anyGroupGrade } : r)))}
+                            className={inputClass}
+                          >
+                            <option value="">{t('modal_select_group')}</option>
+                            {!group && rule.id && <option value={rule.id}>{rule.id}</option>}
+                            {illegalGroups.map((g) => (
+                              <option key={g.id} value={g.id}>{g.name}</option>
+                            ))}
+                          </select>
+                          <select
+                            value={rule.grade}
+                            onChange={(e) => setGroupRules((prev) => prev.map((r, i) => (i === index ? { ...r, grade: Number(e.target.value) } : r)))}
+                            className={`${inputClass} max-w-[200px]`}
+                          >
+                            <option value={settings.anyGroupGrade}>{t('modal_group_any_rank')}</option>
+                            {(group?.ranks ?? []).map((rank) => (
+                              <option key={rank.grade} value={rank.grade}>≥ {rank.label}</option>
+                            ))}
+                            {!group && rule.grade < settings.anyGroupGrade && <option value={rule.grade}>≥ {rule.grade}</option>}
+                          </select>
+                          <IconButton onClick={() => setGroupRules((prev) => prev.filter((_, i) => i !== index))} className="hover:bg-rose-500/10 hover:text-rose-400">
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </IconButton>
+                        </div>
+                      )
+                    })}
+                    {settings.sxIllegals && (
+                      <button
+                        type="button"
+                        onClick={() => setGroupRules((prev) => [...prev, { id: '', grade: settings.anyGroupGrade }])}
+                        className="w-full rounded-lg border border-dashed border-zinc-800 py-2 text-xs text-zinc-500 transition hover:border-zinc-700 hover:text-zinc-300"
+                      >
+                        + {t('modal_add_group')}
+                      </button>
+                    )}
+                  </div>
+                </Field>
+              )}
 
               <Field label={t('modal_items')} hint={t('modal_items_hint')}>
                 <TagInput values={items} onChange={setItems} placeholder="key_lspd" />

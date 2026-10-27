@@ -8,6 +8,12 @@ Config.Framework = 'auto'
 -- 'mysql' forces oxmysql, 'json' always uses the JSON file
 Config.Storage = 'auto'
 
+-- Optional integrations, the access rules of a resource only appear when it is started
+Config.Integrations = {
+    -- Resource name of sxIllegals, enables access by criminal group. Set to false to disable
+    sxIllegals = 'sxIllegals',
+}
+
 -- Keep the lock state of every door across restarts. When false, doors go back to their default state
 Config.PersistState = true
 

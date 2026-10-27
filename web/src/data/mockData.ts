@@ -2,7 +2,7 @@ import type { AdminData, DoorItem } from '../types/doors'
 
 const now = Math.floor(Date.now() / 1000)
 
-const emptyAccess = { jobs: {}, aces: [], identifiers: [], items: [] }
+const emptyAccess = { jobs: {}, groups: {}, aces: [], identifiers: [], items: [] }
 
 export const MOCK_DOORS: DoorItem[] = [
   {
@@ -79,7 +79,7 @@ export const MOCK_DOORS: DoorItem[] = [
     hidePrompt: false,
     hasPin: true,
     pin: '0000',
-    access: emptyAccess,
+    access: { ...emptyAccess, groups: { 'GRP-1720000000-AB12': 1 } },
     uses: 3,
     createdAt: now - 86400,
     updatedAt: now - 86400,
@@ -102,6 +102,10 @@ export const MOCK_ADMIN_DATA: AdminData = {
     { name: 'mechanic', label: 'Mechanic', grades: [{ grade: 0, label: 'Recruit' }, { grade: 1, label: 'Mechanic' }, { grade: 2, label: 'Boss' }] },
     { name: 'police', label: 'LSPD', grades: [{ grade: 0, label: 'Cadet' }, { grade: 1, label: 'Officer' }, { grade: 2, label: 'Sergeant' }, { grade: 3, label: 'Lieutenant' }, { grade: 4, label: 'Chief' }] },
   ],
+  illegalGroups: [
+    { id: 'GRP-1720000000-AB12', name: 'Ballas', color: 'rgb(147, 51, 234)', ranks: [{ grade: 0, label: 'Boss' }, { grade: 1, label: 'Lieutenant' }, { grade: 2, label: 'Recruit' }] },
+    { id: 'GRP-1720000000-CD34', name: 'Vagos', color: 'rgb(234, 179, 8)', ranks: [{ grade: 0, label: 'Jefe' }, { grade: 1, label: 'Soldado' }] },
+  ],
   framework: 'esx',
   storage: 'mysql',
   settings: {
@@ -110,5 +114,7 @@ export const MOCK_ADMIN_DATA: AdminData = {
     defaultDistance: 2,
     persistState: true,
     lockpick: true,
+    sxIllegals: true,
+    anyGroupGrade: 999,
   },
 }

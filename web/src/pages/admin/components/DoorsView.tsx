@@ -15,6 +15,7 @@ import {
   Plus,
   Search,
   ShieldCheck,
+  Skull,
   Timer,
   Trash2,
   Users,
@@ -22,8 +23,8 @@ import {
 } from 'lucide-react'
 import { Badge, Button, EmptyState, IconButton } from '../../../components/ui'
 import { useTranslation } from '../../../hooks/useTranslation'
-import type { DoorItem, DoorType, JobItem } from '../../../types/doors'
-import { copyToClipboard, formatRelativeTime, isRestricted, jobLabel } from '../../../utils/format'
+import type { DoorItem, DoorType, IllegalGroup, JobItem } from '../../../types/doors'
+import { copyToClipboard, formatRelativeTime, groupLabel, isRestricted, jobLabel } from '../../../utils/format'
 import { DOOR_TYPES, getDoorTypeMeta } from './doorMeta'
 
 type StateFilter = 'all' | 'locked' | 'unlocked' | 'restricted' | 'public' | 'pin' | 'lockpick'
@@ -31,6 +32,8 @@ type StateFilter = 'all' | 'locked' | 'unlocked' | 'restricted' | 'public' | 'pi
 interface DoorsViewProps {
   doors: DoorItem[]
   jobs: JobItem[]
+  illegalGroups: IllegalGroup[]
+  anyGroupGrade: number
   onCreate: () => void
   onEdit: (door: DoorItem) => void
   onDelete: (door: DoorItem) => void
@@ -53,7 +56,7 @@ function matchesFilter(door: DoorItem, filter: StateFilter): boolean {
   }
 }
 
-export function DoorsView({ doors, jobs, onCreate, onEdit, onDelete, onToggleState, onTeleport, onHighlight }: DoorsViewProps) {
+export function DoorsView({ doors, jobs, illegalGroups, anyGroupGrade, onCreate, onEdit, onDelete, onToggleState, onTeleport, onHighlight }: DoorsViewProps) {
   const { t } = useTranslation()
   const [search, setSearch] = useState('')
   const [filter, setFilter] = useState<StateFilter>('all')
@@ -70,10 +73,11 @@ export function DoorsView({ doors, jobs, onCreate, onEdit, onDelete, onToggleSta
         door.label.toLowerCase().includes(query) ||
         door.id.toLowerCase().includes(query) ||
         Object.keys(door.access.jobs).some((job) => job.toLowerCase().includes(query)) ||
+        Object.keys(door.access.groups).some((id) => (illegalGroups.find((g) => g.id === id)?.name ?? id).toLowerCase().includes(query)) ||
         door.access.items.some((item) => item.toLowerCase().includes(query))
       )
     })
-  }, [doors, filter, search, typeFilter])
+  }, [doors, filter, illegalGroups, search, typeFilter])
 
   const handleCopy = (id: string) => {
     copyToClipboard(id)
@@ -183,6 +187,9 @@ export function DoorsView({ doors, jobs, onCreate, onEdit, onDelete, onToggleSta
                   {!isRestricted(door) && <Badge tone="success" icon={<Users className="h-3 w-3" />}>{t('access_public')}</Badge>}
                   {jobEntries.map(([name, grade]) => (
                     <Badge key={name} tone="info" icon={<Briefcase className="h-3 w-3" />}>{jobLabel(name, grade, jobs)}</Badge>
+                  ))}
+                  {Object.entries(door.access.groups).map(([id, grade]) => (
+                    <Badge key={id} tone="danger" icon={<Skull className="h-3 w-3" />}>{groupLabel(id, grade, illegalGroups, anyGroupGrade)}</Badge>
                   ))}
                   {door.access.items.map((item) => (
                     <Badge key={item} tone="violet" icon={<Package className="h-3 w-3" />}>{item}</Badge>

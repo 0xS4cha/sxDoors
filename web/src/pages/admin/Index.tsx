@@ -37,6 +37,7 @@ export function AdminPanel({ visible, openCount }: { visible: boolean; openCount
     doors,
     activity,
     jobs,
+    illegalGroups,
     framework,
     storage,
     settings,
@@ -129,6 +130,8 @@ export function AdminPanel({ visible, openCount }: { visible: boolean; openCount
                 <DoorsView
                   doors={doors}
                   jobs={jobs}
+                  illegalGroups={illegalGroups}
+                  anyGroupGrade={settings.anyGroupGrade}
                   onCreate={() => setModal({ mode: 'create' })}
                   onEdit={(door) => setModal({ mode: 'edit', door })}
                   onDelete={(door) => setConfirm({ kind: 'delete', door })}
@@ -150,6 +153,7 @@ export function AdminPanel({ visible, openCount }: { visible: boolean; openCount
             key={modal.mode === 'edit' ? modal.door.id : 'create'}
             door={modal.mode === 'edit' ? modal.door : null}
             jobs={jobs}
+            illegalGroups={illegalGroups}
             settings={settings}
             onClose={() => setModal(null)}
             onSubmit={(payload) => (modal.mode === 'edit' ? updateDoor(modal.door.id, payload) : createDoor(payload))}
